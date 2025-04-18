@@ -58,11 +58,11 @@
                             </div>
                             <div class="mb-3">
                                 <label for="category" class="form-label">Category</label>
-                                <select class="form-select" id="category" th:field="*{category}" required>
+                                <select class="form-select" id="category" name="category" required>
                                     <option value="">Select a category</option>
-                                    <option th:each="category : ${T(com.financialtracker.model.Expense.ExpenseCategory).values()}"
+                                    <option th:each="category : ${expenseCategories}"
                                             th:value="${category.name()}"
-                                            th:text="${category.displayName}"></option>
+                                            th:text="${category}"></option>
                                 </select>
                                 <div class="text-danger" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
                             </div>

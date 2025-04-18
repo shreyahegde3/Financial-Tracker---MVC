@@ -52,13 +52,14 @@ public class BudgetController {
             Map<Budget.ExpenseCategory, Double> expensesByCategory = expenses.stream()
                 .filter(e -> !e.getDate().isBefore(startOfMonth) && !e.getDate().isAfter(endOfMonth))
                 .collect(Collectors.groupingBy(
-                    e -> Budget.ExpenseCategory.valueOf(e.getCategory().name()),
+                    e -> Budget.ExpenseCategory.valueOf(e.getCategory()),
                     Collectors.summingDouble(Expense::getAmount)
                 ));
 
             model.addAttribute("budgets", budgets);
             model.addAttribute("budget", new Budget());
             model.addAttribute("expensesByCategory", expensesByCategory);
+            model.addAttribute("expenseCategories", Budget.ExpenseCategory.values());
             return "budgets/list";
         } catch (Exception e) {
             logger.error("Error in showBudgetList: ", e);
@@ -77,6 +78,7 @@ public class BudgetController {
                 User user = userRepository.findByEmail(auth.getName()).orElseThrow();
                 List<Budget> budgets = budgetRepository.findByUserIdOrderByStartDateDesc(user.getId());
                 model.addAttribute("budgets", budgets);
+                model.addAttribute("expenseCategories", Budget.ExpenseCategory.values());
                 return "budgets/list";
             }
 
@@ -101,6 +103,7 @@ public class BudgetController {
             User user = userRepository.findByEmail(auth.getName()).orElseThrow();
             List<Budget> budgets = budgetRepository.findByUserIdOrderByStartDateDesc(user.getId());
             model.addAttribute("budgets", budgets);
+            model.addAttribute("expenseCategories", Budget.ExpenseCategory.values());
             return "budgets/list";
         }
     }
@@ -110,11 +113,11 @@ public class BudgetController {
         try {
             Budget budget = budgetRepository.findById(id).orElseThrow();
             model.addAttribute("budget", budget);
+            model.addAttribute("expenseCategories", Budget.ExpenseCategory.values());
             return "budgets/edit";
         } catch (Exception e) {
             logger.error("Error in showEditForm: ", e);
-            model.addAttribute("error", "Failed to load budget: " + e.getMessage());
-            return "redirect:/budgets";
+            throw e;
         }
     }
 
@@ -123,12 +126,7 @@ public class BudgetController {
         try {
             if (result.hasErrors()) {
                 logger.error("Validation errors in update: {}", result.getAllErrors());
-                return "budgets/edit";
-            }
-
-            // Validate date range
-            if (budget.getEndDate().isBefore(budget.getStartDate())) {
-                result.rejectValue("endDate", "error.endDate", "End date must be after start date");
+                model.addAttribute("expenseCategories", Budget.ExpenseCategory.values());
                 return "budgets/edit";
             }
 
@@ -142,20 +140,13 @@ public class BudgetController {
             return "redirect:/budgets";
         } catch (Exception e) {
             logger.error("Error in updateBudget: ", e);
-            model.addAttribute("error", "Failed to update budget: " + e.getMessage());
-            return "budgets/edit";
+            throw e;
         }
     }
 
     @PostMapping("/{id}/delete")
-    public String deleteBudget(@PathVariable Long id, Model model) {
-        try {
-            budgetRepository.deleteById(id);
-            return "redirect:/budgets";
-        } catch (Exception e) {
-            logger.error("Error in deleteBudget: ", e);
-            model.addAttribute("error", "Failed to delete budget: " + e.getMessage());
-            return "redirect:/budgets";
-        }
+    public String deleteBudget(@PathVariable Long id) {
+        budgetRepository.deleteById(id);
+        return "redirect:/budgets";
     }
 } 

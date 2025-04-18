@@ -4,11 +4,13 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Entity
 @Table(name = "income")
-public class Income {
+public class Income implements Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "income_id")
@@ -31,14 +33,24 @@ public class Income {
     private IncomeCategory category;
 
     @NotNull
-    private java.time.LocalDate date;
+    private LocalDate date;
 
     @NotNull
     @Column(name = "is_recurring")
     private boolean recurring;
 
     @Column(name = "created_at")
-    private java.time.LocalDateTime createdAt;
+    private LocalDateTime createdAt;
+
+    @Override
+    public String getDescription() {
+        return source.toString();
+    }
+
+    @Override
+    public String getCategory() {
+        return category.toString();
+    }
 
     public enum IncomeSource {
         SALARY, FREELANCE, INVESTMENTS, BUSINESS, OTHER
@@ -50,6 +62,6 @@ public class Income {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = java.time.LocalDateTime.now();
+        createdAt = LocalDateTime.now();
     }
 } 

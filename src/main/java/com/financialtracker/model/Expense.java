@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "expenses")
-public class Expense {
+public class Expense implements Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "expense_id")
@@ -40,6 +40,11 @@ public class Expense {
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Override
+    public String getCategory() {
+        return category.toString();
+    }
 
     public enum ExpenseCategory {
         HOUSING("Housing"),

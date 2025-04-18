@@ -55,21 +55,23 @@
                             </div>
                             <div class="mb-3">
                                 <label for="source" class="form-label">Source</label>
-                                <select class="form-select" id="source" th:field="*{source}" required>
+                                <select class="form-select" id="source" name="source" required>
                                     <option value="">Select a source</option>
-                                    <option th:each="source : ${T(com.financialtracker.model.Income.IncomeSource).values()}"
-                                            th:value="${source}"
-                                            th:text="${source}"></option>
+                                    <option th:each="source : ${incomeSources}"
+                                            th:value="${source.name()}"
+                                            th:text="${source}"
+                                            th:selected="${source == income.source}"></option>
                                 </select>
                                 <div class="text-danger" th:if="${#fields.hasErrors('source')}" th:errors="*{source}"></div>
                             </div>
                             <div class="mb-3">
                                 <label for="category" class="form-label">Category</label>
-                                <select class="form-select" id="category" th:field="*{category}" required>
+                                <select class="form-select" id="category" name="category" required>
                                     <option value="">Select a category</option>
-                                    <option th:each="category : ${T(com.financialtracker.model.Income.IncomeCategory).values()}"
-                                            th:value="${category}"
-                                            th:text="${category}"></option>
+                                    <option th:each="category : ${incomeCategories}"
+                                            th:value="${category.name()}"
+                                            th:text="${category}"
+                                            th:selected="${category == income.category}"></option>
                                 </select>
                                 <div class="text-danger" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
                             </div>

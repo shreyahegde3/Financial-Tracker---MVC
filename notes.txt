@@ -1,0 +1,89 @@
+I'll analyze the design patterns implemented in your financial tracker application:
+Singleton Pattern
+Implementation: Spring's dependency injection system inherently uses the Singleton pattern
+Location: All @Service, @Repository, and @Controller annotated classes
+Purpose:
+Ensures only one instance of each service/repository/controller exists
+Manages shared resources efficiently
+Provides global access point to these instances
+Example:
+Apply to notes.txt
+Factory Pattern
+Implementation: TransactionFactory class
+Location: src/main/java/com/financialtracker/factory/TransactionFactory.java
+Purpose:
+Creates different types of transactions (Income/Expense) based on input
+Encapsulates object creation logic
+Makes the system extensible for new transaction types
+Example:
+Apply to notes.txt
+Builder Pattern
+Implementation: Lombok's @Builder annotation
+Location: Entity classes like Income, Expense, Budget
+Purpose:
+Provides a flexible way to construct complex objects
+Makes object creation more readable and maintainable
+Allows for immutable objects
+Example:
+Apply to notes.txt
+Strategy Pattern
+Implementation: Transaction interface with different implementations
+Location:
+Transaction interface
+Income and Expense classes implementing the interface
+Purpose:
+Encapsulates different transaction behaviors
+Allows for interchangeable algorithms
+Makes the system extensible for new transaction types
+Example:
+Apply to notes.txt
+Repository Pattern
+Implementation: Spring Data JPA repositories
+Location: *Repository interfaces
+Purpose:
+Abstracts data access logic
+Provides a collection-like interface for accessing domain objects
+Decouples business logic from data access logic
+Example:
+Apply to notes.txt
+MVC Pattern
+Implementation: Spring MVC framework
+Location: Controllers, Models, and Views
+Purpose:
+Separates concerns into Model, View, and Controller
+Makes the application more maintainable and testable
+Provides clear separation of business logic and presentation
+Example:
+Apply to notes.txt
+Template Method Pattern
+Implementation: Spring's JpaRepository interface
+Location: Repository interfaces
+Purpose:
+Defines the skeleton of an algorithm
+Allows subclasses to redefine certain steps
+Promotes code reuse
+Example:
+Apply to notes.txt
+Observer Pattern
+Implementation: Spring's event handling system
+Location: Event listeners and publishers
+Purpose:
+Allows objects to notify other objects about state changes
+Provides loose coupling between objects
+Enables event-driven architecture
+Example:
+Apply to notes.txt
+These design patterns work together to create a well-structured, maintainable, and extensible financial tracking application. They help in:
+Managing object creation and lifecycle
+Separating concerns
+Making the code more maintainable
+Enabling future extensions
+Providing clear interfaces between components
+Managing data access and persistence
+Handling user interactions and business logic
+The combination of these patterns follows SOLID principles and makes the application robust and scalable.
+
+@Service
+public class UserService {
+    // Only one instance of UserService is created and shared
+}

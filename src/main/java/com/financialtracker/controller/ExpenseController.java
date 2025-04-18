@@ -38,6 +38,7 @@ public class ExpenseController {
             List<Expense> expenses = expenseRepository.findByUserIdOrderByDateDesc(user.getId());
             model.addAttribute("expenses", expenses);
             model.addAttribute("expense", new Expense());
+            model.addAttribute("expenseCategories", Expense.ExpenseCategory.values());
             return "expenses/list";
         } catch (Exception e) {
             logger.error("Error in showExpenseList: ", e);
@@ -46,7 +47,9 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public String addExpense(@Valid @ModelAttribute("expense") Expense expense, BindingResult result, Model model) {
+    public String addExpense(@Valid @ModelAttribute("expense") Expense expense,
+                           @RequestParam("category") String categoryStr,
+                           BindingResult result, Model model) {
         try {
             if (result.hasErrors()) {
                 logger.error("Validation errors: {}", result.getAllErrors());
@@ -55,6 +58,14 @@ public class ExpenseController {
                 User user = userRepository.findByEmail(auth.getName()).orElseThrow();
                 List<Expense> expenses = expenseRepository.findByUserIdOrderByDateDesc(user.getId());
                 model.addAttribute("expenses", expenses);
+                model.addAttribute("expenseCategories", Expense.ExpenseCategory.values());
+                return "expenses/list";
+            }
+
+            try {
+                expense.setCategory(Expense.ExpenseCategory.valueOf(categoryStr));
+            } catch (IllegalArgumentException e) {
+                result.rejectValue("category", "error.category", "Invalid category");
                 return "expenses/list";
             }
 
@@ -77,6 +88,7 @@ public class ExpenseController {
             User user = userRepository.findByEmail(auth.getName()).orElseThrow();
             List<Expense> expenses = expenseRepository.findByUserIdOrderByDateDesc(user.getId());
             model.addAttribute("expenses", expenses);
+            model.addAttribute("expenseCategories", Expense.ExpenseCategory.values());
             model.addAttribute("error", "Failed to add expense: " + e.getMessage());
             return "expenses/list";
         }
@@ -87,6 +99,7 @@ public class ExpenseController {
         try {
             Expense expense = expenseRepository.findById(id).orElseThrow();
             model.addAttribute("expense", expense);
+            model.addAttribute("expenseCategories", Expense.ExpenseCategory.values());
             return "expenses/edit";
         } catch (Exception e) {
             logger.error("Error in showEditForm: ", e);
@@ -95,36 +108,34 @@ public class ExpenseController {
     }
 
     @PostMapping("/{id}/edit")
-    public String updateExpense(@PathVariable Long id, @Valid @ModelAttribute("expense") Expense expense, BindingResult result) {
-        try {
-            if (result.hasErrors()) {
-                logger.error("Validation errors in update: {}", result.getAllErrors());
-                return "expenses/edit";
-            }
+    public String updateExpense(@PathVariable Long id, 
+                              @Valid @ModelAttribute("expense") Expense expense,
+                              @RequestParam("category") String categoryStr,
+                              BindingResult result) {
+        if (result.hasErrors()) {
+            return "expense/edit";
+        }
 
+        try {
+            Expense.ExpenseCategory category = Expense.ExpenseCategory.valueOf(categoryStr);
+            
             Expense existingExpense = expenseRepository.findById(id).orElseThrow();
             existingExpense.setAmount(expense.getAmount());
-            existingExpense.setCategory(expense.getCategory());
-            existingExpense.setDescription(expense.getDescription());
+            existingExpense.setCategory(category);
             existingExpense.setDate(expense.getDate());
             existingExpense.setRecurring(expense.isRecurring());
 
             expenseRepository.save(existingExpense);
             return "redirect:/expenses";
-        } catch (Exception e) {
-            logger.error("Error in updateExpense: ", e);
-            throw e;
+        } catch (IllegalArgumentException e) {
+            result.rejectValue("category", "error.category", "Invalid category");
+            return "expense/edit";
         }
     }
 
     @PostMapping("/{id}/delete")
     public String deleteExpense(@PathVariable Long id) {
-        try {
-            expenseRepository.deleteById(id);
-            return "redirect:/expenses";
-        } catch (Exception e) {
-            logger.error("Error in deleteExpense: ", e);
-            throw e;
-        }
+        expenseRepository.deleteById(id);
+        return "redirect:/expenses";
     }
 } 

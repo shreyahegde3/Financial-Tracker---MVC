@@ -33,12 +33,25 @@ public class IncomeController {
         List<Income> incomes = incomeRepository.findByUserIdOrderByDateDesc(user.getId());
         model.addAttribute("incomes", incomes);
         model.addAttribute("income", new Income());
+        model.addAttribute("incomeSources", Income.IncomeSource.values());
+        model.addAttribute("incomeCategories", Income.IncomeCategory.values());
         return "income/list";
     }
 
     @PostMapping
-    public String addIncome(@Valid @ModelAttribute("income") Income income, BindingResult result) {
+    public String addIncome(@Valid @ModelAttribute("income") Income income, 
+                          @RequestParam("source") String sourceStr,
+                          @RequestParam("category") String categoryStr,
+                          BindingResult result) {
         if (result.hasErrors()) {
+            return "income/list";
+        }
+
+        try {
+            income.setSource(Income.IncomeSource.valueOf(sourceStr));
+            income.setCategory(Income.IncomeCategory.valueOf(categoryStr));
+        } catch (IllegalArgumentException e) {
+            result.rejectValue("source", "error.source", "Invalid source or category");
             return "income/list";
         }
 
@@ -59,24 +72,38 @@ public class IncomeController {
     public String showEditForm(@PathVariable Long id, Model model) {
         Income income = incomeRepository.findById(id).orElseThrow();
         model.addAttribute("income", income);
+        model.addAttribute("incomeSources", Income.IncomeSource.values());
+        model.addAttribute("incomeCategories", Income.IncomeCategory.values());
         return "income/edit";
     }
 
     @PostMapping("/{id}/edit")
-    public String updateIncome(@PathVariable Long id, @Valid @ModelAttribute("income") Income income, BindingResult result) {
+    public String updateIncome(@PathVariable Long id, 
+                             @Valid @ModelAttribute("income") Income income,
+                             @RequestParam("source") String sourceStr,
+                             @RequestParam("category") String categoryStr,
+                             BindingResult result) {
         if (result.hasErrors()) {
             return "income/edit";
         }
 
-        Income existingIncome = incomeRepository.findById(id).orElseThrow();
-        existingIncome.setAmount(income.getAmount());
-        existingIncome.setSource(income.getSource());
-        existingIncome.setCategory(income.getCategory());
-        existingIncome.setDate(income.getDate());
-        existingIncome.setRecurring(income.isRecurring());
+        try {
+            Income.IncomeSource source = Income.IncomeSource.valueOf(sourceStr);
+            Income.IncomeCategory category = Income.IncomeCategory.valueOf(categoryStr);
+            
+            Income existingIncome = incomeRepository.findById(id).orElseThrow();
+            existingIncome.setAmount(income.getAmount());
+            existingIncome.setSource(source);
+            existingIncome.setCategory(category);
+            existingIncome.setDate(income.getDate());
+            existingIncome.setRecurring(income.isRecurring());
 
-        incomeRepository.save(existingIncome);
-        return "redirect:/income";
+            incomeRepository.save(existingIncome);
+            return "redirect:/income";
+        } catch (IllegalArgumentException e) {
+            result.rejectValue("source", "error.source", "Invalid source or category");
+            return "income/edit";
+        }
     }
 
     @PostMapping("/{id}/delete")

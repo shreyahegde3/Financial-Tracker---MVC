@@ -41,6 +41,53 @@ public class Budget {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    public Budget() {
+        // Public constructor for JPA
+    }
+
+    public static class Builder {
+        private User user;
+        private ExpenseCategory category;
+        private Double limitAmount;
+        private LocalDate startDate;
+        private LocalDate endDate;
+
+        public Builder user(User user) {
+            this.user = user;
+            return this;
+        }
+
+        public Builder category(ExpenseCategory category) {
+            this.category = category;
+            return this;
+        }
+
+        public Builder limitAmount(Double limitAmount) {
+            this.limitAmount = limitAmount;
+            return this;
+        }
+
+        public Builder startDate(LocalDate startDate) {
+            this.startDate = startDate;
+            return this;
+        }
+
+        public Builder endDate(LocalDate endDate) {
+            this.endDate = endDate;
+            return this;
+        }
+
+        public Budget build() {
+            Budget budget = new Budget();
+            budget.user = this.user;
+            budget.category = this.category;
+            budget.limitAmount = this.limitAmount;
+            budget.startDate = this.startDate;
+            budget.endDate = this.endDate;
+            return budget;
+        }
+    }
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
